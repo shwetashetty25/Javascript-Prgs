@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Random User AJAX Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    #user {
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+    }
+    #user img {
+      border-radius: 50%;
+      margin-right: 15px;
+    }
+    #error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+<h1>Random User Generator</h1>
+<button id="fetchBtn">Fetch Random User</button>
+<div id="user"></div>
+<div id="error"></div>
+
+<script>
+  const button = document.getElementById('fetchBtn');
+  const userDiv = document.getElementById('user');
+  const errorDiv = document.getElementById('error');
+
+  const occupations = [
+    "Software Engineer", "Doctor", "Teacher", "Designer", "Photographer",
+    "Chef", "Architect", "Writer", "Musician", "Accountant"
+  ];
+
+  button.addEventListener('click', () => {
+    userDiv.innerHTML = '';
+    errorDiv.textContent = '';
+
+    const ajax = new XMLHttpRequest();
+    ajax.open("GET", "https://randomuser.me/api/");
+    ajax.onload = function () {
+      if (ajax.status === 200) {
+        try {
+          const data = JSON.parse(ajax.responseText);
+          const user = data.results[0];
+          const img = document.createElement('img');
+          img.src = user.picture.large;
+          img.alt = 'User Picture';
+
+          const occupation = occupations[Math.floor(Math.random() * occupations.length)];
+
+          const info = document.createElement('div');
+          info.innerHTML = `
+            <p><strong>Name:</strong> ${user.name.title} ${user.name.first} ${user.name.last}</p>
+            <p><strong>Gender:</strong> ${user.gender}</p>
+            <p><strong>Email:</strong> ${user.email}</p>
+            <p><strong>City:</strong> ${user.location.city}</p>
+            <p><strong>Country:</strong> ${user.location.country}</p>
+            <p><strong>Occupation:</strong> ${occupation}</p>
+          `;
+
+          userDiv.append(img, info);
+        } catch (e) {
+          errorDiv.textContent = 'Error parsing response.';
+          console.error(e);
+        }
+      } else {
+        errorDiv.textContent = 'Failed to fetch user. Please try again.';
+        console.error("Status:", ajax.status);
+      }
+    };
+    ajax.onerror = function () {
+      errorDiv.textContent = 'Request failed. Please check your internet connection.';
+    };
+    ajax.send();
+  });
+</script>
+</body>
+</html>
